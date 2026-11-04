@@ -789,7 +789,7 @@
 (function(){
   "use strict";
 
-  const APP_VERSION = "1.20.4";
+  const APP_VERSION = "1.20.5";
   const LIKE_GOAL = 5;                 // 취향 분석 결과가 나오는 좋아요 개수
   const APP_DATE = "2026-09-04";
   function loadScriptOnce(src){
@@ -1004,8 +1004,8 @@
   }
   function getStudio(id){ return STUDIOS.find(s=>s.id===id); }
   function getPost(id){ return POSTS.find(p=>p.id===id); }
-  function postsByStudio(id){ return POSTS.filter(p=>p.studioId===id); }
-  function visiblePosts(){ return POSTS.filter(function(p){ const st=getStudio(p.studioId); return st && !st.hidden; }); }
+  function postsByStudio(id){ return POSTS.filter(p=>p.studioId===id && !p.hidden); }
+  function visiblePosts(){ return POSTS.filter(function(p){ const st=getStudio(p.studioId); return st && !st.hidden && !p.hidden; }); }
   function studioTopTags(id, max){
     max = max||3;
     const counts = {};
@@ -1726,7 +1726,7 @@
       if(adminTest && SETTINGS && SETTINGS.logAdmin === false) return;
       const likedIds = getLikedIds();
       if(likedIds.length < LIKE_GOAL) return;
-      const likedPosts = sortByDateDesc(POSTS.filter(p=>likedIds.indexOf(p.id)>-1));
+      const likedPosts = sortByDateDesc(POSTS.filter(p=>likedIds.indexOf(p.id)>-1 && !p.hidden));
       const sig = likedPosts.map(p=>p.id).sort().join(",");
       if(sig===lastLogSig && Date.now()-lastLogAt < 60000) return;   // 같은 구성의 연속 저장(중복 클릭)은 한 번만
       lastLogSig = sig; lastLogAt = Date.now();
@@ -1807,7 +1807,7 @@
   }
   function renderLiked(){
     const likedIds = getLikedIds();
-    const likedPosts = sortByDateDesc(POSTS.filter(p=>likedIds.indexOf(p.id)>-1));
+    const likedPosts = sortByDateDesc(POSTS.filter(p=>likedIds.indexOf(p.id)>-1 && !p.hidden));
     const shownIds = likedViewSnapshot ? likedViewSnapshot.concat(likedIds.filter(function(id){ return likedViewSnapshot.indexOf(id)<0; })) : likedIds;
     const shownPosts = sortByDateDesc(POSTS.filter(p=>shownIds.indexOf(p.id)>-1));
     const goal = LIKE_GOAL;
